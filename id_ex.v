@@ -17,7 +17,7 @@ module ID_EX #(
     input [REG_NUM_BITWIDTH-1:0] Rs1,
     input [REG_NUM_BITWIDTH-1:0] Rs2,
 
-    input hazard,
+    input doNOP,
 
     input [WORD_BITWIDTH-1:0] regReadData1,
     input [WORD_BITWIDTH-1:0] regReadData2,
@@ -51,7 +51,7 @@ module ID_EX #(
     if (rst) begin
       {ex_wt_branch, ex_wt_memRead, ex_wt_memToReg, ex_ALUOp, ex_wt_memWrite, ex_ALUSrc, ex_wt_regWrite} <= 0;
     end else begin
-      {ex_wt_branch, ex_wt_memRead, ex_wt_memToReg, ex_ALUOp, ex_wt_memWrite, ex_ALUSrc, ex_wt_regWrite} <= hazard ? 
+      {ex_wt_branch, ex_wt_memRead, ex_wt_memToReg, ex_ALUOp, ex_wt_memWrite, ex_ALUSrc, ex_wt_regWrite} <= doNOP ? 
       0 :
       {branch, memRead, memToReg, ALUOp, memWrite, ALUSrc, regWrite};
     end

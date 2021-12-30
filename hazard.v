@@ -8,10 +8,10 @@ module Hazard #(
     input [REG_NUM_BITWIDTH-1:0] if_Rs2,
 
     output if_write,
-    output PCWrite,
-    output if_doNOP
+    output if_PCWrite,//Implementation yet to be confirmed.
+    output id_doNOP
 );
-  assign if_doNOP = id_memRead && ((id_Rd == if_Rs1) || (id_Rd == if_Rs2));
-  assign if_write = if_doNOP;
-  assign PCWrite  = if_doNOP;
+  assign id_doNOP = id_memRead && ((id_Rd == if_Rs1) || (id_Rd == if_Rs2));
+  assign if_write = id_doNOP;
+  assign PCWrite  = id_doNOP;
 endmodule

@@ -5,8 +5,7 @@ module IF_ID #(
     input clk,
     input rst,
 
-    input Flush,
-    input hazard,
+    input hz_write,
 
     input      [WORD_BITWIDTH-1:0] pc,
     input      [WORD_BITWIDTH-1:0] instruction,
@@ -18,8 +17,13 @@ module IF_ID #(
       id_wt_pc       <= 0;
       id_instruction <= 0;
     end else begin
-      id_wt_pc       = pc;
-      id_instruction = instruction;
+      if (hz_write) begin
+        id_wt_pc       <= id_wt_pc;
+        id_instruction <= id_instruction;
+      end else begin
+        id_wt_pc       <= pc;
+        id_instruction <= instruction;
+      end
     end
   end
 endmodule

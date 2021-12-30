@@ -40,7 +40,7 @@ module ID #(
       .INST_J    (INST_J),
       .INST_U    (INST_U)
   ) control (
-      .opcode  (instruction[6:0]),
+      .opcode  (opcode),
       .branch  (branch),
       .memRead (memRead),
       .memToReg(memToReg),
@@ -50,7 +50,7 @@ module ID #(
       .regWrite(regWrite)
   );
   always @(*) begin
-    case (instruction[6:0])
+    case (opcode)
       INST_R: begin
         imm = 0;
       end
