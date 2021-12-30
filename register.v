@@ -13,7 +13,7 @@ module REGISTER #(
         output reg [WORD_BITWIDTH-1:0] read_data1,
         output reg [WORD_BITWIDTH-1:0] read_data2
     );
-    reg [WORD_BITWIDTH-1:0] reg_file [31:0];
+    reg [WORD_BITWIDTH-1:0] reg_file [0:31];
     always @(posedge clk or posedge rst)
     begin
         if(rst)

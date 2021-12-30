@@ -14,9 +14,7 @@ module CONTROL #(
     output reg [1:0] ALUOp   ,
     output reg       memWrite,
     output reg       ALUSrc  ,
-    output reg       regWrite,
-    
-    output reg       IF_Flush
+    output reg       regWrite
 );
     always @(opcode)
         begin
