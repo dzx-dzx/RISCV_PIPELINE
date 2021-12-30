@@ -10,7 +10,7 @@ module MEM_WB #(
 
     input [WORD_BITWIDTH-1:0] ALUresult,
     input [WORD_BITWIDTH-1:0] memReadData,
-    input [WORD_BITWIDTH-1:0] regToWrite,
+    input [REG_NUM_BITWIDTH-1:0] regToWrite,
 
     output reg [WORD_BITWIDTH-1:0] wb_regWriteData,
     output reg [REG_NUM_BITWIDTH-1:0] wb_regToWrite,

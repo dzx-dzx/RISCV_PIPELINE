@@ -33,8 +33,12 @@ module riscv #(
 assign inst_ce_o = ~rst;
 
 //  instance your module  below
-wire [WORD_BITWIDTH-1:0] if_pc   ;
-wire [WORD_BITWIDTH-1:0] if_id_pc;
+wire [WORD_BITWIDTH-1:0] if_pc       ;
+wire [WORD_BITWIDTH-1:0] if_id_pc    ;
+wire                     ex_mem_PCSrc;
+wire                     hz_PCWrite  ;
+wire [WORD_BITWIDTH-1:0] id_imm      ;
+
 IF #(
     .REG_NUM_BITWIDTH(REG_NUM_BITWIDTH),
     .WORD_BITWIDTH   (WORD_BITWIDTH   )
@@ -52,6 +56,7 @@ IF #(
 assign inst_addr_o = if_pc;
 
 wire [WORD_BITWIDTH-1:0] if_id_instruction;
+wire                     hz_if_write      ;
 IF_ID #(
     .REG_NUM_BITWIDTH(REG_NUM_BITWIDTH),
     .WORD_BITWIDTH   (WORD_BITWIDTH   )
@@ -78,7 +83,6 @@ wire                        id_regWrite  ;
 wire [REG_NUM_BITWIDTH-1:0] id_regToRead1;
 wire [REG_NUM_BITWIDTH-1:0] id_regToRead2;
 wire [REG_NUM_BITWIDTH-1:0] id_regToWrite;
-wire [   WORD_BITWIDTH-1:0] id_imm       ;
 wire [                 6:0] id_opcode    ;
 wire [                 3:0] id_inst_ALU  ;
 
@@ -103,9 +107,12 @@ ID #(
     .inst_ALU   (id_inst_ALU      )
 );
 
-wire [WORD_BITWIDTH-1:0] id_regWriteData;
-wire [WORD_BITWIDTH-1:0] id_regReadData1;
-wire [WORD_BITWIDTH-1:0] id_regReadData2;
+wire [   WORD_BITWIDTH-1:0] id_regWriteData    ;
+wire [   WORD_BITWIDTH-1:0] id_regReadData1    ;
+wire [   WORD_BITWIDTH-1:0] id_regReadData2    ;
+wire [REG_NUM_BITWIDTH-1:0] mem_wb_regToWrite  ;
+wire [   WORD_BITWIDTH-1:0] mem_wb_regWriteData;
+wire                        mem_wb_regWrite    ;
 
 REGISTER #(
     .REG_NUM_BITWIDTH(REG_NUM_BITWIDTH),
@@ -140,7 +147,7 @@ wire                        id_ex_wt_memToReg  ;
 wire                        id_ex_wt_memWrite  ;
 wire                        id_ex_wt_regWrite  ;
 wire [REG_NUM_BITWIDTH-1:0] id_ex_wt_regToWrite;
-
+wire                        hz_id_doNOP        ;
 ID_EX #(
     .REG_NUM_BITWIDTH(REG_NUM_BITWIDTH),
     .WORD_BITWIDTH   (WORD_BITWIDTH   )
@@ -188,36 +195,37 @@ ID_EX #(
     .ex_wt_regToWrite(id_ex_wt_regToWrite)
 );
 
-wire                     ex_zero     ;
-wire [WORD_BITWIDTH-1:0] ex_ALUresult;
-
+wire                     ex_zero         ;
+wire [WORD_BITWIDTH-1:0] ex_ALUresult    ;
+wire [WORD_BITWIDTH-1:0] ex_mem_ALUresult;
+wire [              1:0] forwardA        ;
+wire [              1:0] forwardB        ;
 EX #(
     .REG_NUM_BITWIDTH(REG_NUM_BITWIDTH),
     .WORD_BITWIDTH   (WORD_BITWIDTH   )
 ) ex_u (
-    .regReadData1       (id_ex_regReadData1 ),
-    .regReadData2       (id_ex_regReadData2 ),
-    .imm                (id_ex_imm          ),
-    .ALUSrc             (id_ex_ALUSrc       ),
-    .ALUOp              (id_ex_ALUOp        ),
-    .inst_ALU           (id_ex_inst_ALU     ),
-    .opcode             (id_ex_opcode       ),
+    .regReadData1   (id_ex_regReadData1 ),
+    .regReadData2   (id_ex_regReadData2 ),
+    .imm            (id_ex_imm          ),
+    .ALUSrc         (id_ex_ALUSrc       ),
+    .ALUOp          (id_ex_ALUOp        ),
+    .inst_ALU       (id_ex_inst_ALU     ),
+    .opcode         (id_ex_opcode       ),
     
-    .fd_mem_regReadData1(fd_mem_regReadData1),
-    .fd_mem_regReadData2(fd_mem_regReadData2),
-    .fd_wb_regReadData1 (fd_wb_regReadData1 ),
-    .fd_wb_regReadData2 (fd_wb_regReadData2 ),
-    .forwardA           (forwardA           ),
-    .forwardB           (forwardB           ),
+    .fd_ex_mem_data1(ex_mem_ALUresult   ),
+    .fd_ex_mem_data2(ex_mem_ALUresult   ),
+    .fd_mem_wb_data1(mem_wb_regWriteData),
+    .fd_mem_wb_data2(mem_wb_regWriteData),
+    .forwardA       (forwardA           ),
+    .forwardB       (forwardB           ),
     
-    .zero               (ex_zero            ),
-    .ALUresult          (ex_ALUresult       )
+    .zero           (ex_zero            ),
+    .ALUresult      (ex_ALUresult       )
 );
 
-wire ex_mem_PCSrc;
+
 
 wire                     ex_mem_memToReg    ;
-wire [WORD_BITWIDTH-1:0] ex_mem_ALUresult   ;
 wire [WORD_BITWIDTH-1:0] ex_mem_regReadData2;
 wire                     ex_mem_memRead     ;
 wire                     ex_mem_memWrite    ;
@@ -265,19 +273,14 @@ MEM #(
 ) mem_u (
     .ALUresult   (ex_mem_ALUresult   ),
     .regReadData2(ex_mem_regReadData2),
-    .memWrite    (ex_mem_memWrite    ),
-    .memRead     (ex_mem_memRead     ),
+    .memReadData (data_i             ),
     .memToReg    (ex_mem_memToReg    ),
     
     .regWriteData(mem_regWriteData   ),
     .address     (data_addr_o        ),
-    .memWriteData(data_o             ),
-    .memReadData (data_i             )
+    .memWriteData(data_o             )
 );
 
-wire [   WORD_BITWIDTH-1:0] mem_wb_regWriteData;
-wire [REG_NUM_BITWIDTH-1:0] mem_wb_regToWrite  ;
-wire                        mem_wb_regWrite    ;
 
 MEM_WB #(
     .REG_NUM_BITWIDTH(REG_NUM_BITWIDTH),
@@ -289,7 +292,7 @@ MEM_WB #(
     .regWrite       (ex_mem_wt_regWrite  ),
     .memToReg       (ex_mem_wt_memToReg  ),
     .ALUresult      (ex_mem_ALUresult    ), //Also write through
-    .memReadData    (ex_mem_memRead      ),
+    .memReadData    (data_i              ),
     .regToWrite     (ex_mem_wt_regToWrite),
     
     .wb_regWriteData(mem_wb_regWriteData ),
@@ -297,9 +300,6 @@ MEM_WB #(
     .wb_regWrite    (mem_wb_regWrite     )
 );
 
-wire hz_PCWrite ;
-wire hz_id_doNOP;
-wire hz_if_write;
 Hazard #(
     .REG_NUM_BITWIDTH(REG_NUM_BITWIDTH),
     .WORD_BITWIDTH   (WORD_BITWIDTH   )
@@ -313,8 +313,7 @@ Hazard #(
     .PCWrite   (hz_PCWrite         ),
     .id_doNOP  (hz_id_doNOP        )
 );
-wire [1:0] forwardA;
-wire [1:0] forwardB;
+
 Forwarding #(
     .REG_NUM_BITWIDTH(REG_NUM_BITWIDTH),
     .WORD_BITWIDTH   (WORD_BITWIDTH   )
