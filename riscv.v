@@ -33,12 +33,13 @@ module riscv #(
 
 //  instance your module  below
 wire [WORD_BITWIDTH-1:0] if_pc       ;
-wire [WORD_BITWIDTH-1:0] if_id_pc    ;
+wire [WORD_BITWIDTH-1:0] if_id_wt_pc ;
 wire                     ex_mem_PCSrc;
 wire                     hz_PCWrite  ;
 wire [WORD_BITWIDTH-1:0] id_imm      ;
+wire [WORD_BITWIDTH-1:0] ex_mem_branch_pc;
 
-assign inst_ce_o = ~rst & if_pc!=32'hFFFFFFFC;
+assign inst_ce_o = ~rst & if_pc!=32'hFFFFFFFC & !ex_mem_PCSrc;
 
 IF #(
     .REG_NUM_BITWIDTH(REG_NUM_BITWIDTH),
@@ -49,8 +50,7 @@ IF #(
     
     .PCSrc     (ex_mem_PCSrc),
     .hz_PCWrite(hz_PCWrite  ),
-    .imm       (id_imm      ),
-    .if_id_pc  (if_id_pc    ),
+    .branch_pc  (ex_mem_branch_pc),
     
     .pc        (if_pc       )
 );
@@ -70,7 +70,7 @@ IF_ID #(
     .pc               (if_pc            ),
     .instruction      (inst_i           ),
     
-    .id_wt_pc         (if_id_pc         ),
+    .if_wt_pc         (if_id_wt_pc      ),
     .if_id_instruction(if_id_instruction)
 );
 
@@ -147,6 +147,8 @@ wire                        id_ex_wt_memWrite  ;
 wire                        id_ex_wt_regWrite  ;
 wire [REG_NUM_BITWIDTH-1:0] id_ex_wt_regToWrite;
 wire                        hz_id_doNOP        ;
+
+wire [WORD_BITWIDTH-1:0] id_ex_wt_pc;
 ID_EX #(
     .REG_NUM_BITWIDTH(REG_NUM_BITWIDTH),
     .WORD_BITWIDTH   (WORD_BITWIDTH   )
@@ -174,6 +176,9 @@ ID_EX #(
     .imm             (id_imm             ),
     .opcode          (id_opcode          ),
     
+    .id_pc           (if_id_wt_pc        ),
+    .ex_wt_pc        (id_ex_wt_pc        ),
+    
     .ex_ALUOp        (id_ex_ALUOp        ),
     .ex_ALUSrc       (id_ex_ALUSrc       ),
     
@@ -194,12 +199,12 @@ ID_EX #(
     .ex_wt_regToWrite(id_ex_wt_regToWrite)
 );
 
-wire                     ex_zero         ;
-wire [WORD_BITWIDTH-1:0] ex_ALUresult    ;
-wire [WORD_BITWIDTH-1:0] ex_mem_ALUresult;
-wire [              1:0] forwardA        ;
-wire [              1:0] forwardB        ;
-wire [WORD_BITWIDTH-1:0] ex_data2        ;
+wire                     ex_zero          ;
+wire [WORD_BITWIDTH-1:0] ex_ALUresult     ;
+wire [WORD_BITWIDTH-1:0] ex_mem_ALUresult ;
+wire [              1:0] forwardA         ;
+wire [              1:0] forwardB         ;
+wire [WORD_BITWIDTH-1:0] ex_finalReadData2;
 EX #(
     .REG_NUM_BITWIDTH(REG_NUM_BITWIDTH),
     .WORD_BITWIDTH   (WORD_BITWIDTH   )
@@ -221,15 +226,15 @@ EX #(
     
     .zero           (ex_zero            ),
     .ALUresult      (ex_ALUresult       ),
-    .data2          (ex_data2           )
+    .finalReadData2 (ex_finalReadData2  )
 );
 
 
 
-wire                     ex_mem_memToReg    ;
-wire [WORD_BITWIDTH-1:0] ex_mem_regReadData2;
-wire                     ex_mem_memRead     ;
-wire                     ex_mem_memWrite    ;
+wire                     ex_mem_memToReg      ;
+wire [WORD_BITWIDTH-1:0] ex_mem_finalReadData2;
+wire                     ex_mem_memRead       ;
+wire                     ex_mem_memWrite      ;
 
 wire                        ex_mem_wt_memToReg  ;
 wire                        ex_mem_wt_regWrite  ;
@@ -239,30 +244,35 @@ EX_MEM #(
     .REG_NUM_BITWIDTH(REG_NUM_BITWIDTH),
     .WORD_BITWIDTH   (WORD_BITWIDTH   )
 ) ex_mem_u (
-    .clk              (clk                 ),
-    .rst              (rst                 ),
+    .clk               (clk                  ),
+    .rst               (rst                  ),
     
-    .memToReg         (id_ex_wt_memToReg   ),
-    .regWrite         (id_ex_wt_regWrite   ),
-    .branch           (id_ex_wt_branch     ),
-    .memRead          (id_ex_wt_memRead    ),
-    .memWrite         (id_ex_wt_memWrite   ),
+    .memToReg          (id_ex_wt_memToReg    ),
+    .regWrite          (id_ex_wt_regWrite    ),
+    .branch            (id_ex_wt_branch      ),
+    .memRead           (id_ex_wt_memRead     ),
+    .memWrite          (id_ex_wt_memWrite    ),
     
-    .ALUresult        (ex_ALUresult        ),
-    .zero             (ex_zero             ),
-    .regReadData2     (ex_data2            ), //Different due to forwarding.
-    .regToWrite       (id_ex_wt_regToWrite ),
+    .ALUresult         (ex_ALUresult         ),
+    .zero              (ex_zero              ),
+    .finalReadData2    (ex_finalReadData2    ), //Different due to forwarding.
+    .regToWrite        (id_ex_wt_regToWrite  ),
     
-    .mem_memToReg     (ex_mem_memToReg     ),
-    .mem_ALUresult    (ex_mem_ALUresult    ),
-    .mem_regReadData2 (ex_mem_regReadData2 ),
-    .mem_memRead      (ex_mem_memRead      ),
-    .mem_memWrite     (ex_mem_memWrite     ),
+    .ex_pc             (id_ex_wt_pc),
+    .ex_imm            (id_ex_imm),
     
-    .PCSrc            (ex_mem_PCSrc        ),
-    .mem_wt_memToReg  (ex_mem_wt_memToReg  ),
-    .mem_wt_regWrite  (ex_mem_wt_regWrite  ),
-    .mem_wt_regToWrite(ex_mem_wt_regToWrite)
+    .mem_memToReg      (ex_mem_memToReg      ),
+    .mem_ALUresult     (ex_mem_ALUresult     ),
+    .mem_finalReadData2(ex_mem_finalReadData2),
+    .mem_memRead       (ex_mem_memRead       ),
+    .mem_memWrite      (ex_mem_memWrite      ),
+    
+    .PCSrc             (ex_mem_PCSrc         ),
+    .mem_wt_memToReg   (ex_mem_wt_memToReg   ),
+    .mem_wt_regWrite   (ex_mem_wt_regWrite   ),
+    .mem_wt_regToWrite (ex_mem_wt_regToWrite ),
+    
+    .ex_mem_branch_pc  (ex_mem_branch_pc     )
 );
 
 assign data_we_o = ex_mem_memWrite;
@@ -272,14 +282,14 @@ MEM #(
     .REG_NUM_BITWIDTH(REG_NUM_BITWIDTH),
     .WORD_BITWIDTH   (WORD_BITWIDTH   )
 ) mem_u (
-    .ALUresult   (ex_mem_ALUresult   ),
-    .regReadData2(ex_mem_regReadData2),
-    .memReadData (data_i             ),
-    .memToReg    (ex_mem_memToReg    ),
+    .ALUresult     (ex_mem_ALUresult     ),
+    .finalReadData2(ex_mem_finalReadData2),
+    .memReadData   (data_i               ),
+    .memToReg      (ex_mem_memToReg      ),
     
-    .regWriteData(mem_regWriteData   ),
-    .address     (data_addr_o        ),
-    .memWriteData(data_o             )
+    .regWriteData  (mem_regWriteData     ),
+    .address       (data_addr_o          ),
+    .memWriteData  (data_o               )
 );
 
 

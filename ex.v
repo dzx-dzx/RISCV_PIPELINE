@@ -40,83 +40,85 @@ module EX #(
 
     output zero,
     output [WORD_BITWIDTH-1:0] ALUresult,
-    output [WORD_BITWIDTH-1:0] data2
+    output [WORD_BITWIDTH-1:0] finalReadData2//After ALUSrc
 );
-  wire [WORD_BITWIDTH-1:0] addend1, addend2;
-  reg [WORD_BITWIDTH-1:0] readData1, readData2;
-  always @(*) begin
+wire [WORD_BITWIDTH-1:0] addend1;
+wire [WORD_BITWIDTH-1:0] addend2  ;
+reg  [WORD_BITWIDTH-1:0] readData1;
+reg  [WORD_BITWIDTH-1:0] readData2;
+always @(*) begin
     case (forwardA)
-      2'b01:   readData1 = fd_mem_wb_data1;
-      2'b10:   readData1 = fd_ex_mem_data1;
-      2'b00:   readData1 = regReadData1;
-      default: readData1 = 32'hDEADBEEF;
+        2'b01   : readData1 = fd_mem_wb_data1;
+        2'b10   : readData1 = fd_ex_mem_data1;
+        2'b00   : readData1 = regReadData1;
+        default : readData1 = 32'hDEADBEEF;
     endcase
-  end
-  always @(*) begin
+end
+always @(*) begin
     case (forwardB)
-      2'b01:   readData2 = fd_mem_wb_data2;
-      2'b10:   readData2 = fd_ex_mem_data2;
-      2'b00:   readData2 = regReadData2;
-      default: readData2 = 32'hDEADBEEF;
+        2'b01   : readData2 = fd_mem_wb_data2;
+        2'b10   : readData2 = fd_ex_mem_data2;
+        2'b00   : readData2 = regReadData2;
+        default : readData2 = 32'hDEADBEEF;
     endcase
-  end
-  assign addend1 = readData1;
-  assign addend2 = ALUSrc ? imm : readData2;
-  assign data2=addend2;
+end
+assign addend1 = readData1;
+assign addend2 = ALUSrc ? imm : readData2;
+assign finalReadData2   = addend2;
 
-  reg [3:0] operation;
+reg [3:0] operation;
 
-  always @(*) begin
+always @(*) begin
     case (opcode)
-      INST_R, INST_I_LD, INST_I_IMM, INST_S: begin
-        case (ALUOp)
-          2'b00:   operation = ADD;
-          2'b01:   operation = SUBTRACT;
-          2'b10, 2'b11: begin
-            case (inst_ALU[2:0])
-              3'b111:  operation = AND;
-              3'b110:  operation = OR;
-              3'b000:  operation = inst_ALU[3] ? SUBTRACT : ADD;
-              3'b100:  operation = XOR;
-              3'b001:  operation = SLL;
-              3'b101:  operation = SRL;
-              default: operation = UNDEFINED;
+        INST_R, INST_I_LD, INST_I_IMM, INST_S: begin
+            case (ALUOp)
+                2'b00 : operation = ADD;
+                2'b01 : operation = SUBTRACT;
+                2'b10, 2'b11: begin
+                    case (inst_ALU[2:0])
+                        3'b111  : operation = AND;
+                        3'b110  : operation = OR;
+                        3'b000  : operation = inst_ALU[3] ? SUBTRACT : ADD;
+                        3'b100  : operation = XOR;
+                        3'b001  : operation = SLL;
+                        3'b101  : operation = SRL;
+                        default : operation = UNDEFINED;
+                    endcase
+                end
+                default : operation = UNDEFINED;
             endcase
-          end
-          default: operation = UNDEFINED;
-        endcase
 
 
-      end
-      INST_B: begin
-        case (inst_ALU[2:0])
-          3'b0: operation = SUBTRACT;
-          3'b100: operation = LESS_THAN;
-          default: operation = UNDEFINED;
-        endcase
-      end
-      INST_J: begin
-        operation = ZERO;
-      end
-      default: operation = UNDEFINED;
+        end
+        INST_B : begin
+            case (inst_ALU[2:0])
+                3'b0    : operation = SUBTRACT;
+                3'b100  : operation = LESS_THAN;
+                default : operation = UNDEFINED;
+            endcase
+        end
+        INST_J : begin
+            operation = ZERO;
+        end
+        default : operation = UNDEFINED;
     endcase
-  end
+end
 
-  ALU #(
-      .AND(AND),
-      .OR(OR),
-      .ADD(ADD),
-      .SUBTRACT(SUBTRACT),
-      .XOR(XOR),
-      .SLL(SLL),
-      .SRL(SRL),
-      .LESS_THAN(LESS_THAN),
-      .ZERO(ZERO)
-  ) alu (
-      .operation(operation),
-      .addend1(addend1),
-      .addend2(addend2),
-      .zero(zero),
-      .result(ALUresult)
-  );
+ALU #(
+    .AND      (AND      ),
+    .OR       (OR       ),
+    .ADD      (ADD      ),
+    .SUBTRACT (SUBTRACT ),
+    .XOR      (XOR      ),
+    .SLL      (SLL      ),
+    .SRL      (SRL      ),
+    .LESS_THAN(LESS_THAN),
+    .ZERO     (ZERO     )
+) alu (
+    .operation(operation),
+    .addend1  (addend1  ),
+    .addend2  (addend2  ),
+    .zero     (zero     ),
+    .result   (ALUresult)
+);
 endmodule

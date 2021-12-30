@@ -25,6 +25,8 @@ module ID_EX #(
     input [WORD_BITWIDTH-1:0] imm,
     input [6:0] opcode,
 
+    input [WORD_BITWIDTH-1:0] id_pc,
+
     output reg [1:0] ex_ALUOp,
     output reg       ex_ALUSrc,
 
@@ -44,7 +46,9 @@ module ID_EX #(
     output reg ex_wt_memWrite,
     output reg ex_wt_regWrite,
 
-    output reg [REG_NUM_BITWIDTH-1:0] ex_wt_regToWrite
+    output reg [REG_NUM_BITWIDTH-1:0] ex_wt_regToWrite,
+
+    output reg [WORD_BITWIDTH-1:0] ex_wt_pc
 
 );
   always @(posedge clk or posedge rst) begin
@@ -116,6 +120,14 @@ module ID_EX #(
       ex_inst_ALU <= 0;
     end else begin
       ex_inst_ALU <= inst_ALU;
+    end
+  end
+
+  always @(posedge clk or posedge rst) begin
+    if (rst) begin
+      ex_wt_pc <= 0;
+    end else begin
+      ex_wt_pc <= id_pc;
     end
   end
 endmodule

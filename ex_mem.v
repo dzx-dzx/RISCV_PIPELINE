@@ -2,26 +2,29 @@ module EX_MEM #(
     parameter REG_NUM_BITWIDTH = 5 ,
     parameter WORD_BITWIDTH    = 32
 ) (
-    input                             clk              ,
-    input                             rst              ,
-    input                             memToReg         ,
-    input                             regWrite         ,
-    input                             branch           ,
-    input                             memRead          ,
-    input                             memWrite         ,
-    input      [   WORD_BITWIDTH-1:0] ALUresult        ,
-    input                             zero             ,
-    input      [   WORD_BITWIDTH-1:0] regReadData2     ,
-    input      [REG_NUM_BITWIDTH-1:0] regToWrite       ,
-    output reg                        mem_memToReg     ,
-    output reg [   WORD_BITWIDTH-1:0] mem_ALUresult    ,
-    output reg [   WORD_BITWIDTH-1:0] mem_regReadData2 ,
-    output reg                        PCSrc            ,
-    output reg                        mem_memRead      ,
-    output reg                        mem_memWrite     ,
-    output reg                        mem_wt_memToReg  ,
-    output reg                        mem_wt_regWrite  ,
-    output reg [REG_NUM_BITWIDTH-1:0] mem_wt_regToWrite
+    input                             clk               ,
+    input                             rst               ,
+    input                             memToReg          ,
+    input                             regWrite          ,
+    input                             branch            ,
+    input                             memRead           ,
+    input                             memWrite          ,
+    input      [   WORD_BITWIDTH-1:0] ALUresult         ,
+    input                             zero              ,
+    input      [   WORD_BITWIDTH-1:0] finalReadData2    ,
+    input      [REG_NUM_BITWIDTH-1:0] regToWrite        ,
+    input      [   WORD_BITWIDTH-1:0] ex_pc             ,
+    input      [   WORD_BITWIDTH-1:0] ex_imm            ,
+    output reg                        mem_memToReg      ,
+    output reg [   WORD_BITWIDTH-1:0] mem_ALUresult     ,
+    output reg [   WORD_BITWIDTH-1:0] mem_finalReadData2,
+    output reg                        PCSrc             ,
+    output reg                        mem_memRead       ,
+    output reg                        mem_memWrite      ,
+    output reg                        mem_wt_memToReg   ,
+    output reg                        mem_wt_regWrite   ,
+    output reg [REG_NUM_BITWIDTH-1:0] mem_wt_regToWrite ,
+    output reg [   WORD_BITWIDTH-1:0] ex_mem_branch_pc
 );
     always @(posedge clk or posedge rst) begin
         if (rst) begin
@@ -40,9 +43,9 @@ module EX_MEM #(
     end
     always @(posedge clk or posedge rst) begin
         if (rst) begin
-            mem_regReadData2 <= 0;
+            mem_finalReadData2 <= 0;
         end else begin
-            mem_regReadData2 <= regReadData2;
+            mem_finalReadData2 <= finalReadData2;
         end
     end
     always @(posedge clk or posedge rst) begin
@@ -56,14 +59,14 @@ module EX_MEM #(
         if (rst) begin
             mem_memRead <= 0;
         end else begin
-            mem_memRead <= mem_memRead;
+            mem_memRead <= memRead;
         end
     end
     always @(posedge clk or posedge rst) begin
         if (rst) begin
             mem_memWrite <= 0;
         end else begin
-            mem_memWrite <= mem_memWrite;
+            mem_memWrite <= memWrite;
         end
     end
     always @(posedge clk or posedge rst) begin
@@ -85,6 +88,13 @@ module EX_MEM #(
             mem_wt_regToWrite <= 0;
         end else begin
             mem_wt_regToWrite <= regToWrite;
+        end
+    end
+    always @(posedge clk or posedge rst) begin
+        if (rst) begin
+            ex_mem_branch_pc <= 0;
+        end else begin
+            ex_mem_branch_pc <= ex_pc+ex_imm;
         end
     end
 endmodule
