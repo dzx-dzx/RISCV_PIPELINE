@@ -26,58 +26,58 @@ module ID #(
     output [6:0] opcode,
     output [3:0] inst_ALU
 );
-  assign regToRead1 = instruction[19:15];
-  assign regToRead2 = instruction[24:20];
-  assign regToWrite = instruction[11:7];
-  assign opcode     = instruction[6:0];
-  assign inst_ALU   = {instruction[30], instruction[14:12]};
-  CONTROL #(
-      .INST_R    (INST_R),
-      .INST_I_LD (INST_I_LD),
-      .INST_I_IMM(INST_I_IMM),
-      .INST_S    (INST_S),
-      .INST_B    (INST_B),
-      .INST_J    (INST_J),
-      .INST_U    (INST_U)
-  ) control (
-      .opcode  (opcode),
-      .branch  (branch),
-      .memRead (memRead),
-      .memToReg(memToReg),
-      .ALUOp   (ALUOp),
-      .memWrite(memWrite),
-      .ALUSrc  (ALUSrc),
-      .regWrite(regWrite)
-  );
-  always @(*) begin
+assign regToRead1 = instruction[19:15];
+assign regToRead2 = instruction[24:20];
+assign regToWrite = instruction[11:7];
+assign opcode     = instruction[6:0];
+assign inst_ALU   = {instruction[30], instruction[14:12]};
+CONTROL #(
+    .INST_R    (INST_R    ),
+    .INST_I_LD (INST_I_LD ),
+    .INST_I_IMM(INST_I_IMM),
+    .INST_S    (INST_S    ),
+    .INST_B    (INST_B    ),
+    .INST_J    (INST_J    ),
+    .INST_U    (INST_U    )
+) control (
+    .opcode  (opcode  ),
+    .branch  (branch  ),
+    .memRead (memRead ),
+    .memToReg(memToReg),
+    .ALUOp   (ALUOp   ),
+    .memWrite(memWrite),
+    .ALUSrc  (ALUSrc  ),
+    .regWrite(regWrite)
+);
+always @(*) begin
     case (opcode)
-      INST_R: begin
-        imm = 0;
-      end
-      INST_I_LD: begin
-        imm = {(instruction[31] == 0) ? {20'b0} : {20{1'b1}}, instruction[31:20]};
-      end
-      INST_I_IMM: begin
-        imm = {(instruction[31] == 0) ? {20'b0} : {20{1'b1}}, instruction[31:20]};
-      end
-      INST_S: begin
-        imm = {
-          (instruction[31] == 0) ? {20'b0} : {20{1'b1}}, instruction[31:25], instruction[11:7]
-        };
-      end
-      INST_B: begin
-        imm = {
-          (instruction[31] == 0) ? {19'b0} : {19{1'b1}},
-          instruction[31],
-          instruction[7],
-          instruction[30:25],
-          instruction[11:8],
-          1'b0
-        };
-      end
-      INST_J, INST_U: imm = imm;
-      default: imm = imm;
+        INST_R : begin
+            imm = 0;
+        end
+        INST_I_LD : begin
+            imm = {(instruction[31] == 0) ? {20'b0} : {20{1'b1}}, instruction[31:20]};
+        end
+        INST_I_IMM : begin
+            imm = {(instruction[31] == 0) ? {20'b0} : {20{1'b1}}, instruction[31:20]};
+        end
+        INST_S : begin
+            imm = {
+                (instruction[31] == 0) ? {20'b0} : {20{1'b1}}, instruction[31:25], instruction[11:7]
+            };
+        end
+        INST_B : begin
+            imm = {
+                (instruction[31] == 0) ? {19'b0} : {19{1'b1}},
+                instruction[31],
+                instruction[7],
+                instruction[30:25],
+                instruction[11:8],
+                1'b0
+            };
+        end
+        INST_J, INST_U: imm = 0;
+        default : imm = 0;
     endcase
-  end
+end
 
 endmodule

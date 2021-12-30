@@ -56,6 +56,20 @@ module ID_EX #(
       {branch, memRead, memToReg, ALUOp, memWrite, ALUSrc, regWrite};
     end
   end
+  always @(posedge clk or posedge rst) begin
+    if (rst) begin
+      fd_Rs1 <= 0;
+    end else begin
+      fd_Rs1 <= Rs1;
+    end
+  end
+  always @(posedge clk or posedge rst) begin
+    if (rst) begin
+      fd_Rs2 <= 0;
+    end else begin
+      fd_Rs2 <= Rs2;
+    end
+  end
 
   always @(posedge clk or posedge rst) begin
     if (rst) begin

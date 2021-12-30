@@ -10,16 +10,16 @@ module IF #(
     input hz_PCWrite,
 
     input [WORD_BITWIDTH-1:0] imm,
-    input [WORD_BITWIDTH-1:0] last_pc,
+    input [WORD_BITWIDTH-1:0] if_id_pc,
     output reg [WORD_BITWIDTH-1:0] pc
 );
   reg [WORD_BITWIDTH-1:0] next_pc;
 
-  always @(PCSrc or hz_PCWrite) begin//Should include imm?
-    next_pc = (hz_PCWrite ? pc : ((PCSrc) ? (last_pc + (imm)) : (last_pc + 4)));
+  always @(*) begin//Should include imm?
+    next_pc = (hz_PCWrite ? pc : ((PCSrc) ? (if_id_pc + (imm)) : (pc + 4)));
   end
   always @(posedge clk or posedge rst) begin
-    if (rst) pc <= 0;
+    if (rst) pc <= 32'hFFFFFFFC;
     else pc <= next_pc;
   end
 endmodule

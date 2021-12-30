@@ -30,7 +30,6 @@ module riscv #(
     output wire [31:0] data_o        // store data to  data_mem
 
 );
-assign inst_ce_o = ~rst;
 
 //  instance your module  below
 wire [WORD_BITWIDTH-1:0] if_pc       ;
@@ -38,6 +37,8 @@ wire [WORD_BITWIDTH-1:0] if_id_pc    ;
 wire                     ex_mem_PCSrc;
 wire                     hz_PCWrite  ;
 wire [WORD_BITWIDTH-1:0] id_imm      ;
+
+assign inst_ce_o = ~rst & if_pc!=32'hFFFFFFFC;
 
 IF #(
     .REG_NUM_BITWIDTH(REG_NUM_BITWIDTH),
@@ -49,7 +50,7 @@ IF #(
     .PCSrc     (ex_mem_PCSrc),
     .hz_PCWrite(hz_PCWrite  ),
     .imm       (id_imm      ),
-    .last_pc   (if_id_pc    ),
+    .if_id_pc  (if_id_pc    ),
     
     .pc        (if_pc       )
 );
@@ -107,7 +108,6 @@ ID #(
     .inst_ALU   (id_inst_ALU      )
 );
 
-wire [   WORD_BITWIDTH-1:0] id_regWriteData    ;
 wire [   WORD_BITWIDTH-1:0] id_regReadData1    ;
 wire [   WORD_BITWIDTH-1:0] id_regReadData2    ;
 wire [REG_NUM_BITWIDTH-1:0] mem_wb_regToWrite  ;
@@ -130,7 +130,6 @@ REGISTER #(
     .read_data2(id_regReadData2    )
 );
 
-wire fd_doNOP;
 
 wire [                 1:0] id_ex_ALUOp        ;
 wire                        id_ex_ALUSrc       ;
