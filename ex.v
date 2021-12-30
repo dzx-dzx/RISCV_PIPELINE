@@ -40,9 +40,9 @@ module EX #(
 
     output zero,
     output [WORD_BITWIDTH-1:0] ALUresult,
-    output [WORD_BITWIDTH-1:0] finalReadData2//After ALUSrc
+    output [WORD_BITWIDTH-1:0] finalReadData2
 );
-wire [WORD_BITWIDTH-1:0] addend1;
+wire [WORD_BITWIDTH-1:0] addend1  ;
 wire [WORD_BITWIDTH-1:0] addend2  ;
 reg  [WORD_BITWIDTH-1:0] readData1;
 reg  [WORD_BITWIDTH-1:0] readData2;
@@ -62,9 +62,9 @@ always @(*) begin
         default : readData2 = 32'hDEADBEEF;
     endcase
 end
-assign addend1 = readData1;
-assign addend2 = ALUSrc ? imm : readData2;
-assign finalReadData2   = addend2;
+assign addend1        = readData1;
+assign addend2        = ALUSrc ? imm : readData2;
+assign finalReadData2 = readData2;
 
 reg [3:0] operation;
 
