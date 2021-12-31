@@ -282,7 +282,7 @@ EX_MEM #(
 );
 
 assign data_we_o = ex_mem_memWrite;
-assign data_ce_o = ex_mem_memRead;
+assign data_ce_o = ex_mem_memRead|ex_mem_memWrite;
 wire [WORD_BITWIDTH-1:0] mem_regWriteData;
 MEM #(
     .REG_NUM_BITWIDTH(REG_NUM_BITWIDTH),
