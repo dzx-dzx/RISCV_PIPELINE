@@ -31,10 +31,8 @@ module EX #(
     input [1:0] ALUOp,
     input [3:0] inst_ALU,  //(part of)funct7+funct3
 
-    input [WORD_BITWIDTH-1:0] fd_ex_mem_data1,
-    input [WORD_BITWIDTH-1:0] fd_ex_mem_data2,
-    input [WORD_BITWIDTH-1:0] fd_mem_wb_data1,
-    input [WORD_BITWIDTH-1:0] fd_mem_wb_data2,
+    input [WORD_BITWIDTH-1:0] fd_ex_mem_data,
+    input [WORD_BITWIDTH-1:0] fd_mem_wb_data,
     input [1:0] forwardA,
     input [1:0] forwardB,
 
@@ -48,16 +46,16 @@ reg  [WORD_BITWIDTH-1:0] readData1;
 reg  [WORD_BITWIDTH-1:0] readData2;
 always @(*) begin
     case (forwardA)
-        2'b01   : readData1 = fd_mem_wb_data1;
-        2'b10   : readData1 = fd_ex_mem_data1;
+        2'b01   : readData1 = fd_mem_wb_data;
+        2'b10   : readData1 = fd_ex_mem_data;
         2'b00   : readData1 = regReadData1;
         default : readData1 = 32'hDEADBEEF;
     endcase
 end
 always @(*) begin
     case (forwardB)
-        2'b01   : readData2 = fd_mem_wb_data2;
-        2'b10   : readData2 = fd_ex_mem_data2;
+        2'b01   : readData2 = fd_mem_wb_data;
+        2'b10   : readData2 = fd_ex_mem_data;
         2'b00   : readData2 = regReadData2;
         default : readData2 = 32'hDEADBEEF;
     endcase

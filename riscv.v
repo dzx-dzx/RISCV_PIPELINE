@@ -220,10 +220,8 @@ EX #(
     .inst_ALU       (id_ex_inst_ALU     ),
     .opcode         (id_ex_opcode       ),
     
-    .fd_ex_mem_data1(ex_mem_ALUresult   ),
-    .fd_ex_mem_data2(ex_mem_ALUresult   ),
-    .fd_mem_wb_data1(mem_wb_regWriteData),
-    .fd_mem_wb_data2(mem_wb_regWriteData),
+    .fd_ex_mem_data(ex_mem_ALUresult   ),
+    .fd_mem_wb_data(mem_wb_regWriteData),
     .forwardA       (forwardA           ),
     .forwardB       (forwardB           ),
     
