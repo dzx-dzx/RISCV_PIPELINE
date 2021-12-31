@@ -15,6 +15,7 @@ module EX_MEM #(
     input      [REG_NUM_BITWIDTH-1:0] regToWrite        ,
     input      [   WORD_BITWIDTH-1:0] ex_pc             ,
     input      [   WORD_BITWIDTH-1:0] ex_imm            ,
+    input                             doNOP             ,
     output reg                        mem_memToReg      ,
     output reg [   WORD_BITWIDTH-1:0] mem_ALUresult     ,
     output reg [   WORD_BITWIDTH-1:0] mem_finalReadData2,
@@ -30,7 +31,7 @@ module EX_MEM #(
         if (rst) begin
             mem_memToReg <= 0;
         end else begin
-            mem_memToReg <= memToReg;
+            mem_memToReg <= doNOP?0:memToReg;
         end
     end
 
@@ -59,14 +60,14 @@ module EX_MEM #(
         if (rst) begin
             mem_memRead <= 0;
         end else begin
-            mem_memRead <= memRead;
+            mem_memRead <= doNOP?0:memRead;
         end
     end
     always @(posedge clk or posedge rst) begin
         if (rst) begin
             mem_memWrite <= 0;
         end else begin
-            mem_memWrite <= memWrite;
+            mem_memWrite <= doNOP?0:memWrite;
         end
     end
     always @(posedge clk or posedge rst) begin
@@ -80,14 +81,14 @@ module EX_MEM #(
         if (rst) begin
             mem_wt_regWrite <= 0;
         end else begin
-            mem_wt_regWrite <= regWrite;
+            mem_wt_regWrite <= doNOP?0:regWrite;
         end
     end
     always @(posedge clk or posedge rst) begin
         if (rst) begin
             mem_wt_regToWrite <= 0;
         end else begin
-            mem_wt_regToWrite <= regToWrite;
+            mem_wt_regToWrite <= doNOP?0:regToWrite;
         end
     end
     always @(posedge clk or posedge rst) begin

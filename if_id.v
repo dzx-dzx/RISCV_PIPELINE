@@ -6,7 +6,8 @@ module IF_ID #(
     input                          rst              ,
     input                          hz_write         ,
     input      [WORD_BITWIDTH-1:0] pc               ,
-    input      [WORD_BITWIDTH-1:0] instruction      ,
+    input      [WORD_BITWIDTH-1:0] instruction  ,
+    input doNOP    ,
     output reg [WORD_BITWIDTH-1:0] if_wt_pc         , //write through
     output reg [WORD_BITWIDTH-1:0] if_id_instruction
 );
@@ -15,7 +16,11 @@ module IF_ID #(
             if_wt_pc          <= 0;
             if_id_instruction <= 0;
         end else begin
-            if (hz_write) begin
+            if(doNOP)begin
+                if_wt_pc          <= 0;
+                if_id_instruction <= 0;
+            end
+            else if (hz_write) begin
                 if_wt_pc          <= if_wt_pc;
                 if_id_instruction <= if_id_instruction;
             end else begin
