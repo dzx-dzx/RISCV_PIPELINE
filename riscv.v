@@ -200,6 +200,7 @@ wire [WORD_BITWIDTH-1:0] ex_ALUresult    ;
 wire [WORD_BITWIDTH-1:0] ex_mem_ALUresult;
 wire [              1:0] forwardA        ;
 wire [              1:0] forwardB        ;
+wire [WORD_BITWIDTH-1:0] ex_data2        ;
 EX #(
     .REG_NUM_BITWIDTH(REG_NUM_BITWIDTH),
     .WORD_BITWIDTH   (WORD_BITWIDTH   )
@@ -220,7 +221,8 @@ EX #(
     .forwardB       (forwardB           ),
     
     .zero           (ex_zero            ),
-    .ALUresult      (ex_ALUresult       )
+    .ALUresult      (ex_ALUresult       ),
+    .data2          (ex_data2           )
 );
 
 
@@ -249,7 +251,7 @@ EX_MEM #(
     
     .ALUresult        (ex_ALUresult        ),
     .zero             (ex_zero             ),
-    .regReadData2     (id_ex_regReadData2  ), //Also write through
+    .regReadData2     (ex_data2            ), //Different due to forwarding.
     .regToWrite       (id_ex_wt_regToWrite ),
     
     .mem_memToReg     (ex_mem_memToReg     ),

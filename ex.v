@@ -39,7 +39,8 @@ module EX #(
     input [1:0] forwardB,
 
     output zero,
-    output [WORD_BITWIDTH-1:0] ALUresult
+    output [WORD_BITWIDTH-1:0] ALUresult,
+    output [WORD_BITWIDTH-1:0] data2
 );
   wire [WORD_BITWIDTH-1:0] addend1, addend2;
   reg [WORD_BITWIDTH-1:0] readData1, readData2;
@@ -61,7 +62,7 @@ module EX #(
   end
   assign addend1 = readData1;
   assign addend2 = ALUSrc ? imm : readData2;
-
+  assign data2=addend2;
 
   reg [3:0] operation;
 
