@@ -69,7 +69,16 @@ module CONTROL #(
                         ALUSrc   = 0;
                         regWrite = 0;
                     end
-                INST_J,
+                INST_J :
+                    begin
+                        branch   = 1;
+                        memRead  = 0;
+                        memToReg = 0;
+                        ALUOp    = 2'b00;
+                        memWrite = 0;
+                        ALUSrc   = 0;
+                        regWrite = 1;
+                    end
                 INST_U  : 
                     {branch  ,
                         memRead ,

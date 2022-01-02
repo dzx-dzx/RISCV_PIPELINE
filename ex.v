@@ -38,35 +38,34 @@ module EX #(
 
     output zero,
     output [WORD_BITWIDTH-1:0] ALUresult,
-    output [WORD_BITWIDTH-1:0] finalReadData2
+    output reg [WORD_BITWIDTH-1:0] readData2
 );
 wire [WORD_BITWIDTH-1:0] addend1  ;
 wire [WORD_BITWIDTH-1:0] addend2  ;
 reg  [WORD_BITWIDTH-1:0] readData1;
-reg  [WORD_BITWIDTH-1:0] readData2;
 always @(*) begin
     case (forwardA)
+        2'b00   : readData1 = regReadData1;
         2'b01   : readData1 = fd_mem_wb_data;
         2'b10   : readData1 = fd_ex_mem_data;
-        2'b00   : readData1 = regReadData1;
         default : readData1 = 32'hDEADBEEF;
     endcase
 end
 always @(*) begin
     case (forwardB)
+        2'b00   : readData2 = regReadData2;
         2'b01   : readData2 = fd_mem_wb_data;
         2'b10   : readData2 = fd_ex_mem_data;
-        2'b00   : readData2 = regReadData2;
         default : readData2 = 32'hDEADBEEF;
     endcase
 end
 assign addend1        = readData1;
-assign addend2        = ALUSrc ? imm : readData2;
-assign finalReadData2 = readData2;
+assign addend2        = ALUSrc?imm:readData2;
+
 
 reg [3:0] operation;
 
-always @(*) begin
+always @(opcode or inst_ALU) begin//ALUOp stems from these two value.
     case (opcode)
         INST_R, INST_I_LD, INST_I_IMM, INST_S: begin
             case (ALUOp)
@@ -80,10 +79,10 @@ always @(*) begin
                         3'b100  : operation = XOR;
                         3'b001  : operation = SLL;
                         3'b101  : operation = SRL;
-                        default : operation = UNDEFINED;
+                        // default : operation = UNDEFINED;
                     endcase
                 end
-                default : operation = UNDEFINED;
+                // default : operation = UNDEFINED;
             endcase
 
 
@@ -98,7 +97,7 @@ always @(*) begin
         INST_J : begin
             operation = ZERO;
         end
-        default : operation = UNDEFINED;
+        // default : operation = UNDEFINED;
     endcase
 end
 

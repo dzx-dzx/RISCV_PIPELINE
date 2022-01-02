@@ -11,14 +11,14 @@ module EX_MEM #(
     input                             memWrite          ,
     input      [   WORD_BITWIDTH-1:0] ALUresult         ,
     input                             zero              ,
-    input      [   WORD_BITWIDTH-1:0] finalReadData2    ,
+    input      [   WORD_BITWIDTH-1:0] readData2    ,
     input      [REG_NUM_BITWIDTH-1:0] regToWrite        ,
     input      [   WORD_BITWIDTH-1:0] ex_pc             ,
     input      [   WORD_BITWIDTH-1:0] ex_imm            ,
-    input                             doNOP             ,
+    // input                             doNOP             ,
     output reg                        mem_memToReg      ,
     output reg [   WORD_BITWIDTH-1:0] mem_ALUresult     ,
-    output reg [   WORD_BITWIDTH-1:0] mem_finalReadData2,
+    output reg [   WORD_BITWIDTH-1:0] mem_readData2,
     output reg                        PCSrc             ,
     output reg                        mem_memRead       ,
     output reg                        mem_memWrite      ,
@@ -27,11 +27,13 @@ module EX_MEM #(
     output reg [REG_NUM_BITWIDTH-1:0] mem_wt_regToWrite ,
     output reg [   WORD_BITWIDTH-1:0] ex_mem_branch_pc
 );
+    wire doNOP;
+    assign doNOP = 0;
     always @(posedge clk or posedge rst) begin
         if (rst) begin
             mem_memToReg <= 0;
         end else begin
-            mem_memToReg <= doNOP?0:memToReg;
+            mem_memToReg <= memToReg;
         end
     end
 
@@ -44,9 +46,9 @@ module EX_MEM #(
     end
     always @(posedge clk or posedge rst) begin
         if (rst) begin
-            mem_finalReadData2 <= 0;
+            mem_readData2 <= 0;
         end else begin
-            mem_finalReadData2 <= finalReadData2;
+            mem_readData2 <= readData2;
         end
     end
     always @(posedge clk or posedge rst) begin
@@ -60,14 +62,14 @@ module EX_MEM #(
         if (rst) begin
             mem_memRead <= 0;
         end else begin
-            mem_memRead <= doNOP?0:memRead;
+            mem_memRead <= memRead;
         end
     end
     always @(posedge clk or posedge rst) begin
         if (rst) begin
             mem_memWrite <= 0;
         end else begin
-            mem_memWrite <= doNOP?0:memWrite;
+            mem_memWrite <= memWrite;
         end
     end
     always @(posedge clk or posedge rst) begin
@@ -81,14 +83,14 @@ module EX_MEM #(
         if (rst) begin
             mem_wt_regWrite <= 0;
         end else begin
-            mem_wt_regWrite <= doNOP?0:regWrite;
+            mem_wt_regWrite <= regWrite;
         end
     end
     always @(posedge clk or posedge rst) begin
         if (rst) begin
             mem_wt_regToWrite <= 0;
         end else begin
-            mem_wt_regToWrite <= doNOP?0:regToWrite;
+            mem_wt_regToWrite <= regToWrite;
         end
     end
     always @(posedge clk or posedge rst) begin

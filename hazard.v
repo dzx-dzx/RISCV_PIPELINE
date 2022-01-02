@@ -10,8 +10,9 @@ module Hazard #(
     output                        if_write  ,
     output                        PCWrite   , //Implementation yet to be confirmed.
     output                        if_doNOP  ,
-    output                        id_doNOP  ,
-    output                        ex_doNOP
+    output                        id_doNOP  
+    // ,
+    // output                        ex_doNOP
 );
     wire dataHazard   ;
     wire controlHazard;
@@ -26,5 +27,5 @@ module Hazard #(
     assign PCWrite  = dataHazard;
 
     assign if_doNOP = controlHazard;
-    assign ex_doNOP = controlHazard;
+    // assign ex_doNOP = controlHazard;
 endmodule

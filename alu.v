@@ -38,8 +38,8 @@ module ALU #(
                 result = addend1<addend2? 1'b0 : 1'b1;
             ZERO:
                 result = {WORD_BITWIDTH{1'b0}};
-            default :
-                result = {WORD_BITWIDTH{1'b0}};
+            // default :
+            //     result = {WORD_BITWIDTH{1'b0}};
         endcase
     end
     assign zero = result == {WORD_BITWIDTH{1'b0}};

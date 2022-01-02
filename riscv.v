@@ -207,7 +207,7 @@ wire [WORD_BITWIDTH-1:0] ex_ALUresult     ;
 wire [WORD_BITWIDTH-1:0] ex_mem_ALUresult ;
 wire [              1:0] forwardA         ;
 wire [              1:0] forwardB         ;
-wire [WORD_BITWIDTH-1:0] ex_finalReadData2;
+wire [WORD_BITWIDTH-1:0] ex_readData2;
 EX #(
     .REG_NUM_BITWIDTH(REG_NUM_BITWIDTH),
     .WORD_BITWIDTH   (WORD_BITWIDTH   )
@@ -227,13 +227,13 @@ EX #(
     
     .zero           (ex_zero            ),
     .ALUresult      (ex_ALUresult       ),
-    .finalReadData2 (ex_finalReadData2  )
+    .readData2 (ex_readData2  )
 );
 
 
 
 wire                     ex_mem_memToReg      ;
-wire [WORD_BITWIDTH-1:0] ex_mem_finalReadData2;
+wire [WORD_BITWIDTH-1:0] ex_mem_readData2;
 wire                     ex_mem_memRead       ;
 wire                     ex_mem_memWrite      ;
 
@@ -241,7 +241,7 @@ wire                        ex_mem_wt_memToReg  ;
 wire                        ex_mem_wt_regWrite  ;
 wire [REG_NUM_BITWIDTH-1:0] ex_mem_wt_regToWrite;
 
-wire hz_ex_doNOP;
+// wire hz_ex_doNOP;
 
 EX_MEM #(
     .REG_NUM_BITWIDTH(REG_NUM_BITWIDTH),
@@ -258,16 +258,16 @@ EX_MEM #(
     
     .ALUresult         (ex_ALUresult         ),
     .zero              (ex_zero              ),
-    .finalReadData2    (ex_finalReadData2    ), //Different due to forwarding.
+    .readData2    (ex_readData2    ), //Different due to forwarding.
     .regToWrite        (id_ex_wt_regToWrite  ),
     
     .ex_pc             (id_ex_wt_pc          ),
     .ex_imm            (id_ex_imm            ),
-    .doNOP             (hz_ex_doNOP          ),
+    // .doNOP             (hz_ex_doNOP          ),
     
     .mem_memToReg      (ex_mem_memToReg      ),
     .mem_ALUresult     (ex_mem_ALUresult     ),
-    .mem_finalReadData2(ex_mem_finalReadData2),
+    .mem_readData2(ex_mem_readData2),
     .mem_memRead       (ex_mem_memRead       ),
     .mem_memWrite      (ex_mem_memWrite      ),
     
@@ -281,17 +281,15 @@ EX_MEM #(
 
 assign data_we_o = ex_mem_memWrite;
 assign data_ce_o = ex_mem_memRead|ex_mem_memWrite;
-wire [WORD_BITWIDTH-1:0] mem_regWriteData;
 MEM #(
     .REG_NUM_BITWIDTH(REG_NUM_BITWIDTH),
     .WORD_BITWIDTH   (WORD_BITWIDTH   )
 ) mem_u (
     .ALUresult     (ex_mem_ALUresult     ),
-    .finalReadData2(ex_mem_finalReadData2),
+    .readData2(ex_mem_readData2),
     .memReadData   (data_i               ),
     .memToReg      (ex_mem_memToReg      ),
     
-    .regWriteData  (mem_regWriteData     ),
     .address       (data_addr_o          ),
     .memWriteData  (data_o               )
 );
@@ -328,8 +326,9 @@ Hazard #(
     .if_write  (hz_if_write        ),
     .PCWrite   (hz_PCWrite         ),
     .if_doNOP  (hz_if_doNOP        ),
-    .id_doNOP  (hz_id_doNOP        ),
-    .ex_doNOP  (hz_ex_doNOP        )
+    .id_doNOP  (hz_id_doNOP        )
+    // ,
+    // .ex_doNOP  (hz_ex_doNOP        )
 );
 
 Forwarding #(
