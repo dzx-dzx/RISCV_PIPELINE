@@ -67,7 +67,7 @@ assign addend2        = ALUSrc?imm:readData2;
 
 reg [3:0] operation;
 
-always @(opcode or inst_ALU) begin//ALUOp stems from these two value.
+always @(opcode or inst_ALU or ALUOp) begin//ALUOp stems from these two value, but isn't redundant?
     case (opcode)
         INST_R, INST_I_LD, INST_I_IMM, INST_S: begin
             case (ALUOp)
