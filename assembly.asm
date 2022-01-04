@@ -16,6 +16,8 @@ xor  x8,x5,x4;
 addi x5,x0,1
 loop:
 sll  x2,x2,x1
+sll  x2,x2,x1
+srl  x3,x3,x1
 srl  x3,x3,x1
 blt  x2,x12,loop
 sw   x2,0(x12)
