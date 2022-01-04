@@ -8,9 +8,9 @@ module EX #(
     parameter SLL = 4'b0100,
     parameter SRL = 4'b0101,
     parameter LESS_THAN = 4'b0111,
-    parameter ZERO = 4'b0,
+    parameter JAL = 4'b1000,
 
-    parameter UNDEFINED = 4'b1000,
+    parameter UNDEFINED = 4'b1111,
 
     parameter INST_R = 7'b0110011,
     parameter INST_I_LD = 7'b0000011,
@@ -35,6 +35,8 @@ module EX #(
     input [WORD_BITWIDTH-1:0] fd_mem_wb_data,
     input [1:0] forwardA,
     input [1:0] forwardB,
+
+    input [WORD_BITWIDTH-1:0] pc,
 
     output zero,
     output [WORD_BITWIDTH-1:0] ALUresult,
@@ -91,16 +93,16 @@ always @(opcode or inst_ALU) begin//ALUOp stems from these two value.
             case (inst_ALU[2:0])
                 3'b0    : operation = SUBTRACT;
                 3'b100  : operation = LESS_THAN;
-                default : operation = UNDEFINED;
+                // default : operation = UNDEFINED;
             endcase
         end
         INST_J : begin
-            operation = ZERO;
+            operation = JAL;
         end
         // default : operation = UNDEFINED;
     endcase
 end
-
+wire[WORD_BITWIDTH-1:0] result;
 ALU #(
     .AND      (AND      ),
     .OR       (OR       ),
@@ -110,12 +112,13 @@ ALU #(
     .SLL      (SLL      ),
     .SRL      (SRL      ),
     .LESS_THAN(LESS_THAN),
-    .ZERO     (ZERO     )
+    .JAL     (JAL     )
 ) alu (
     .operation(operation),
     .addend1  (addend1  ),
     .addend2  (addend2  ),
     .zero     (zero     ),
-    .result   (ALUresult)
+    .result   (result)
 );
+assign ALUresult=opcode==INST_J?(4+pc):result;
 endmodule

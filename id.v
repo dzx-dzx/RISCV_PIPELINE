@@ -6,7 +6,7 @@ module ID #(
     parameter INST_S = 7'b0100011,
     parameter INST_B = 7'b1100011,
     parameter INST_J = 7'b1101111,
-    parameter INST_U = 7'b0010011,
+    parameter INST_U = 7'b0110111,
     parameter REG_NUM_BITWIDTH = 5,
     parameter WORD_BITWIDTH = 32
 ) (
@@ -75,7 +75,17 @@ always @(*) begin
                 1'b0
             };
         end
-        INST_J, INST_U: imm = 0;
+        INST_J :begin
+            imm = {
+                (instruction[31] == 0) ? {19'b0} : {19{1'b1}},
+                instruction[31],
+                instruction[19:12],
+                instruction[20],
+                instruction[30:21],
+                1'b0
+            };
+        end
+        INST_U  : imm = 0;
         default : imm = 0;
     endcase
 end

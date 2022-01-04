@@ -5,7 +5,7 @@ module CONTROL #(
     parameter INST_S     = 7'b0100011,
     parameter INST_B     = 7'b1100011,
     parameter INST_J     = 7'b1101111,
-    parameter INST_U     = 7'b0010011
+    parameter INST_U     = 7'b0110111
 ) (
     input      [6:0] opcode  ,
     output reg       branch  ,

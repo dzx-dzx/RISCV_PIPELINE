@@ -39,7 +39,7 @@ module Forwarding #(
                         begin
                             forwardB = 2'b10;
                         end
-                    else if (mem_regWrite && mem_Rd == id_Rs1)
+                    else if (mem_regWrite && mem_Rd == id_Rs2)
                         begin
                             forwardB = 2'b01;
                         end

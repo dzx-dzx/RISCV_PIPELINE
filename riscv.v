@@ -224,6 +224,8 @@ EX #(
     .fd_mem_wb_data(mem_wb_regWriteData),
     .forwardA       (forwardA           ),
     .forwardB       (forwardB           ),
+
+    .pc(id_ex_wt_pc),//jal
     
     .zero           (ex_zero            ),
     .ALUresult      (ex_ALUresult       ),
@@ -327,8 +329,6 @@ Hazard #(
     .PCWrite   (hz_PCWrite         ),
     .if_doNOP  (hz_if_doNOP        ),
     .id_doNOP  (hz_id_doNOP        )
-    // ,
-    // .ex_doNOP  (hz_ex_doNOP        )
 );
 
 Forwarding #(

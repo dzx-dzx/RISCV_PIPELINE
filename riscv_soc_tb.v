@@ -1,5 +1,7 @@
 `timescale 1ps/1ps
-
+`include "riscv.v"
+`include "data_mem.v"
+`include "inst_mem.v"
 module riscv_soc_tb();
 
   reg     clk;
