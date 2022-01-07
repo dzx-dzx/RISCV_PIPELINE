@@ -61,8 +61,8 @@ always @(*) begin
         default : readData2 = 32'hDEADBEEF;
     endcase
 end
-assign addend1        = readData1;
-assign addend2        = ALUSrc?imm:readData2;
+assign addend1        = opcode==INST_J?pc:readData1;
+assign addend2        = opcode==INST_J?4:(ALUSrc?imm:readData2);
 
 
 reg [3:0] operation;
@@ -120,5 +120,5 @@ ALU #(
     .zero     (zero     ),
     .result   (result)
 );
-assign ALUresult=opcode==INST_J?(4+pc):result;
+assign ALUresult=result;
 endmodule

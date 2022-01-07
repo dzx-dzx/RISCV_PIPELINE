@@ -24,7 +24,7 @@ module ALU #(
                 result = addend1&addend2;
             OR :
                 result = addend1|addend2;
-            ADD :
+            ADD,JAL :
                 result = addend1+addend2;
             SUBTRACT :
                 result = addend1-addend2;
@@ -36,8 +36,8 @@ module ALU #(
                 result = addend1>>addend2;
             LESS_THAN:
                 result = addend1<addend2? 1'b0 : 1'b1;
-            JAL:
-                result = 32'hDEADBEEF;
+            // JAL:
+            //     result = 32'hDEADBEEF;
             // default :
             //     result = {WORD_BITWIDTH{1'b0}};
         endcase

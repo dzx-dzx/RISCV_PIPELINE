@@ -16,8 +16,6 @@ xor  x8,x5,x4;
 addi x5,x0,1
 loop:
 sll  x2,x2,x1
-sll  x2,x2,x1
-srl  x3,x3,x1
 srl  x3,x3,x1
 blt  x2,x12,loop
 sw   x2,0(x12)
@@ -25,4 +23,23 @@ sub  x13,x13,x1
 beq  x12,x13,eq
 addi x15,x0,-1
 eq:
+;Register
+addi x2,x0,1
+sll  x2,x2,x1
+add x2,x0,x2
+sll  x2,x2,x1
+add x2,x0,x2
+add x2,x0,x2
+sll  x2,x2,x1
+add x2,x0,x2
+add x2,x0,x2
+add x2,x0,x2
+sll  x2,x2,x1
+add x2,x0,x2
+add x2,x0,x2
+add x2,x0,x2
+add x2,x0,x2
+sll  x2,x2,x1
+sll  x2,x2,x1
+
 addi x15,x0,1
