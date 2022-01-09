@@ -4,12 +4,15 @@ addi x1,x0,1
 add  x2,x1,x1
 add  x3,x2,x1
 lw   x4,0(x12)
+addi x4,x4,1;Data Hazard
+addi x4,x4,-1
 jal  x10,main
 addi x15,x0,-1 ;
 main:
 addi x14,x10,10
+addi x14,x14,10
+addi x14,x14,10
 addi x5,x0,15;
-addi x14,x10,10
 and  x6,x5,x4;
 or   x7,x5,x4;
 xor  x8,x5,x4;
@@ -41,5 +44,7 @@ add x2,x0,x2
 add x2,x0,x2
 sll  x2,x2,x1
 sll  x2,x2,x1
+
+andi x15,x0,1;Actually unnecessary.
 
 addi x15,x0,1
